@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Ninja Money</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'game/css/style.css' %}">
+
+</head>
+<body>  
+    <div class="container">
+
+        <div class="title">
+            <h1>Ninja Gold!</h1>
+            <p>The goal is to earn {{ request.session.wincondition.gold }} gold in {{ request.session.wincondition.turns }} turns.</p>
+        </div>
+
+        <div class="banner">
+            <p>Your Gold</p>
+            <p id="balance"> {{ request.session.gold }} </p>
+            <p id="counter">Turn: {{ request.session.counter }}</p>
+
+            
+
+        </div>
+
+
+
+        {% if "win" in request.session %}
+
+            <div class="reset">
+
+                {% if request.session.win %}
+
+                    <h1 class="gain">YOU WON</h1>
+
+                {% else %}
+
+                    <h1 class="loss">Sorry, you lost.</h1>
+
+                {% endif %}
+
+                    {% if "win" in request.session %}
+
+                        <p>Too{% if request.session.win %} easy{% else %} hard{% endif %}?</p>
+                        <p>Set your own win conditions here:</p>
+                        <form action="/reset" method="post" class="reset-form">
+                            {% csrf_token %}
+                            <p>Gold Goal: <span class="tiny">(default is 100)</span></p>
+                            <input type="number" name="goldGoal" class="goal-set">
+                            <p>Turns: <span class="tiny">(default is 10)</span></p>
+                            <input type="number" name="turnsGoal" class="goal-set">
+                            <button type="submit" id="reset-btn">Reset the Game</button>
+                        </form>
+
+                    {% endif %}
+
+            </div>
+
+        {% else %}
+
+            <div class="place-row">
+
+                <div class="places" id="farm">
+                    <h2>Farm</h2>
+                    <p>(earns 10-20 gold)</p>
+                    <form action="/process_money" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="place" value="farm">
+                        <input type="submit" value="Find Gold!" class="submit-btn">
+                    </form>
+                </div>
+                <div class="places" id="cave">
+                    <h2>Cave</h2>
+                    <p>(earns 5-10 gold)</p>
+                    <form action="/process_money" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="place" value="cave">
+                        <input type="submit" value="Find Gold!" class="submit-btn">
+                    </form>
+                </div>
+                <div class="places" id="house">
+                    <h2>House</h2>
+                    <p>(earns 2-5 gold)</p>
+                    <form action="/process_money" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="place" value="house">
+                        <input type="submit" value="Find Gold!" class="submit-btn">
+                    </form>
+                </div>
+                <div class="places" id="casino">
+                    <h2>Casino</h2>
+                    <p>(earns or loses 0-50 gold)</p>
+                    <form action="/process_money" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="place" value="casino">
+                        <input type="submit" value="Find Gold!" class="submit-btn">
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+        
+        <div class="activity-log">
+
+            {% for entry in request.session.activity_log reversed %}
+                <p class="{{ entry.gain }}">
+                    {{ entry.activity }}
+                </p>
+            {% endfor %}
+
+        </div>
+
+    </div>
+</body>
+</html>
